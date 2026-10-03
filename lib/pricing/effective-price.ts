@@ -11,7 +11,14 @@ export interface PriceComponents {
  * effectivePrice = currentPrice + deliveryFee + serviceFee − discountValue, floored at 0.
  * Mirrors the CHECK constraint on PriceObservation.
  */
-export function effectivePrice(c: PriceComponents): Explained<number> {
+export function effectivePrice(input: PriceComponents): Explained<number> {
+  // Pick only the price components; callers may pass a full observation.
+  const c: PriceComponents = {
+    currentPrice: input.currentPrice,
+    deliveryFee: input.deliveryFee,
+    serviceFee: input.serviceFee,
+    discountValue: input.discountValue,
+  };
   for (const [k, v] of Object.entries(c)) {
     if (!Number.isInteger(v) || v < 0) {
       throw new RangeError(`${k} must be a non-negative integer in cents, got ${v}`);

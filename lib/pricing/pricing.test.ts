@@ -26,6 +26,12 @@ describe("effectivePrice", () => {
     expect(r.value).toBe(2688);
     expect(r.explanation.variables).toMatchObject({ currentPrice: 2990, discountValue: 1000 });
   });
+  it("ignores unrelated fields of a full observation", () => {
+    const obs = { observedAt: new Date(), listPrice: 3000, currentPrice: 3000, deliveryFee: 0, serviceFee: 0, discountValue: 0 };
+    const r = effectivePrice(obs);
+    expect(r.value).toBe(3000);
+    expect(Object.keys(r.explanation.variables)).toEqual(["currentPrice", "deliveryFee", "serviceFee", "discountValue"]);
+  });
   it("floors at zero", () => {
     const r = effectivePrice({ currentPrice: 500, deliveryFee: 0, serviceFee: 0, discountValue: 900 });
     expect(r.value).toBe(0);
