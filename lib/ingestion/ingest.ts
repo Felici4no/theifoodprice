@@ -33,26 +33,37 @@ export async function ingest(
 
   await prisma.$transaction(async (tx) => {
     for (const r of raws) {
-      const merchant = await tx.merchant.upsert({
-        where: { platform_name: { platform: r.merchant.platform, name: r.merchant.name } },
-        create: {
-          name: r.merchant.name,
-          platform: r.merchant.platform,
-          externalRef: r.merchant.externalRef,
-          city: r.merchant.city,
-        },
-        update: {},
-      });
-      const item = await tx.item.upsert({
-        where: { merchantId_name: { merchantId: merchant.id, name: r.item.name } },
-        create: {
-          merchantId: merchant.id,
-          name: r.item.name,
-          description: r.item.description,
-          externalRef: r.item.externalRef,
-        },
-        update: {},
-      });
+      // A stable external reference wins over the display name, which can change.
+      const merchant =
+        (r.merchant.externalRef &&
+          (await tx.merchant.findFirst({
+            where: { platform: r.merchant.platform, externalRef: r.merchant.externalRef },
+          }))) ||
+        (await tx.merchant.upsert({
+          where: { platform_name: { platform: r.merchant.platform, name: r.merchant.name } },
+          create: {
+            name: r.merchant.name,
+            platform: r.merchant.platform,
+            externalRef: r.merchant.externalRef,
+            city: r.merchant.city,
+          },
+          update: {},
+        }));
+      const item =
+        (r.item.externalRef &&
+          (await tx.item.findFirst({
+            where: { merchantId: merchant.id, externalRef: r.item.externalRef },
+          }))) ||
+        (await tx.item.upsert({
+          where: { merchantId_name: { merchantId: merchant.id, name: r.item.name } },
+          create: {
+            merchantId: merchant.id,
+            name: r.item.name,
+            description: r.item.description,
+            externalRef: r.item.externalRef,
+          },
+          update: {},
+        }));
       const eff = effectivePrice(r).value;
       const obs = await tx.priceObservation.create({
         data: {

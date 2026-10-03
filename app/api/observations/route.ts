@@ -1,4 +1,5 @@
 import { ZodError } from "zod";
+import { requireApiToken } from "@/lib/http/auth";
 import { runCollector } from "@/lib/ingestion/ingest";
 import { ManualCollector } from "@/lib/ingestion/manual-collector";
 import type { RawPriceObservationInput } from "@/lib/ingestion/types";
@@ -9,13 +10,8 @@ import type { RawPriceObservationInput } from "@/lib/ingestion/types";
  * Requires `Authorization: Bearer $INGEST_API_TOKEN`; disabled when the token is unset.
  */
 export async function POST(request: Request) {
-  const token = process.env.INGEST_API_TOKEN?.trim();
-  if (!token) {
-    return Response.json({ error: "Ingestion API disabled: set INGEST_API_TOKEN." }, { status: 503 });
-  }
-  if (request.headers.get("authorization") !== `Bearer ${token}`) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const denied = requireApiToken(request);
+  if (denied) return denied;
 
   let body: unknown;
   try {
