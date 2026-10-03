@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "theifoodprice — overlay pessoal",
+  "short_name": "theifoodprice",
+  "description": "Overlay pessoal de inteligência de preços. Lê apenas o conteúdo visível da página e envia ao seu backend local, somente quando você clica. Não oficial; sem afiliação com o iFood.",
+  "version": "0.1.0",
+  "permissions": ["storage"],
+  "host_permissions": ["http://localhost/*", "http://127.0.0.1/*"],
+  "background": { "service_worker": "dist/background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://www.ifood.com.br/*"],
+      "js": ["dist/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "action": { "default_title": "theifoodprice — configurações" }
+}

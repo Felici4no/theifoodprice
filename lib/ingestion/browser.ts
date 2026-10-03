@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MIN_EXTRACTION_CONFIDENCE } from "./browser-contract";
 import type { RawPriceObservation } from "./types";
 
 /**
@@ -7,10 +8,7 @@ import type { RawPriceObservation } from "./types";
  * how that becomes a RawPriceObservation. Monetary values are integer cents.
  */
 
-/** Below this, a field (or the whole capture) is not trusted. Shared with the extension. */
-export const MIN_EXTRACTION_CONFIDENCE = 0.6;
-
-export const BROWSER_SOURCE = "browser-extension";
+export { BROWSER_SOURCE, MIN_EXTRACTION_CONFIDENCE } from "./browser-contract";
 
 const cents = z.number().int().nonnegative().max(10_000_000);
 const text = z.string().trim().min(1).max(200);
