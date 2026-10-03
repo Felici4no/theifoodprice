@@ -11,6 +11,9 @@ const options = {
   format: "iife",
   target: "chrome120",
   alias: { "@": path.resolve(here, "..") },
+  // Shadow root mode of the overlay. "closed" in real use; end-to-end tests build with
+  // TFP_SHADOW_MODE=open so the test browser can click inside the card.
+  define: { __TFP_SHADOW_MODE__: JSON.stringify(process.env.TFP_SHADOW_MODE === "open" ? "open" : "closed") },
   logLevel: "info",
 };
 

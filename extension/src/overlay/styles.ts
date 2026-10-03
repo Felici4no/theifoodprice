@@ -31,10 +31,10 @@ button.metric, button.label {
 }
 button.price.metric { font-size: 26px; font-weight: 800; }
 button.label { display: inline-block; margin-top: 8px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; text-decoration: none; }
-.label-low { background: #e8f5ee; color: #1a7f4b; }
-.label-near { background: #f4f4f4; }
-.label-high { background: #fdecec; color: #e5262e; }
-.label-insufficient { background: #fdf3e1; color: #9a6200; }
+button.label-low { background: #e8f5ee; color: #1a7f4b; }
+button.label-near { background: #f4f4f4; }
+button.label-high { background: #fdecec; color: #e5262e; }
+button.label-insufficient { background: #fdf3e1; color: #9a6200; }
 button.primary {
   display: block; width: 100%; margin-top: 12px; padding: 10px; border: 0; border-radius: 999px;
   background: #e5262e; color: #fff; font: 700 13px/1 inherit; font-family: inherit; cursor: pointer;

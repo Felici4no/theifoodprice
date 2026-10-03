@@ -47,8 +47,21 @@ export class PriceOverlay {
     this.root.append(h("style", {}, OVERLAY_CSS));
     this.card = h("section", { class: "card", role: "complementary", "aria-label": "theifoodprice" });
     this.root.append(this.card);
-    this.host.hidden = true;
+    this.setVisible(false);
     document.documentElement.append(this.host);
+  }
+
+  /**
+   * `all: initial` on the host also resets `display`, which would defeat the
+   * [hidden] attribute — so visibility is controlled with an explicit display value.
+   */
+  private setVisible(visible: boolean) {
+    this.host.hidden = !visible;
+    this.host.style.display = visible ? "block" : "none";
+  }
+
+  get visible(): boolean {
+    return this.host.style.display !== "none";
   }
 
   /** For tests (open mode) and debugging. */
@@ -58,7 +71,7 @@ export class PriceOverlay {
 
   hide() {
     this.phase = "hidden";
-    this.host.hidden = true;
+    this.setVisible(false);
   }
 
   destroy() {
@@ -213,6 +226,6 @@ export class PriceOverlay {
       ),
       ...content.filter((c): c is Node | string => Boolean(c)),
     );
-    this.host.hidden = false;
+    this.setVisible(true);
   }
 }

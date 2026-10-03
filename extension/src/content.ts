@@ -11,6 +11,9 @@ import { PriceOverlay } from "./overlay/PriceOverlay";
 
 const DEBOUNCE_MS = 400;
 
+/** Injected by esbuild (see build.mjs). */
+declare const __TFP_SHADOW_MODE__: ShadowRootMode;
+
 function keyOf(e: PageExtraction): string | null {
   if (!e.item) return null;
   return [e.merchantName?.value ?? e.merchantRef?.value, e.item.value.name, e.pricing.currentPrice?.value].join("|");
@@ -39,6 +42,7 @@ function start() {
       }
     },
     onOpenDashboard: (path) => void send({ type: "openDashboard", path }).catch(() => undefined),
+    shadowMode: __TFP_SHADOW_MODE__,
   });
 
   const scan = () => {

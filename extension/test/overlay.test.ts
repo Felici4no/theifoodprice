@@ -49,11 +49,18 @@ beforeEach(() => {
 });
 
 describe("PriceOverlay", () => {
+  it("is not displayed until there is something to show", () => {
+    const { overlay } = setup();
+    // Regression: the host's `all: initial` used to override [hidden], leaving an empty card on every page.
+    expect(overlay.host.style.display).toBe("none");
+    expect(overlay.visible).toBe(false);
+  });
+
   it("previews a confident capture and only submits on click", () => {
     document.body.innerHTML = DIALOG;
     const { overlay, onCapture, $, text } = setup();
     overlay.showPreview(extractPage(document, { pathname: "/" }));
-    expect(overlay.host.hidden).toBe(false);
+    expect(overlay.visible).toBe(true);
     expect(text()).toContain("R$ 32,90");
     expect(text()).toContain("R$ 39,90");
     expect(text()).toContain("Nada é enviado sem o seu clique.");
@@ -111,7 +118,8 @@ describe("PriceOverlay", () => {
     const { overlay, $ } = setup();
     overlay.showPreview(extractPage(document, { pathname: "/" }));
     $("button.close").click();
-    expect(overlay.host.hidden).toBe(true);
+    expect(overlay.visible).toBe(false);
+    expect(overlay.host.style.display).toBe("none");
     expect(overlay.phase).toBe("hidden");
   });
 });
