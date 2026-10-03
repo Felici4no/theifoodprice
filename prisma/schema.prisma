@@ -1,0 +1,174 @@
+// theifoodprice — data model
+//
+// Raw observations (PriceObservation) are append-only and never updated.
+// Derived analytics (PriceAnalysis) can be deleted and recomputed at any time.
+// All monetary values are integers in cents (BRL).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/db/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Merchant {
+  id          String   @id @default(cuid())
+  name        String
+  /// Where the merchant was seen (e.g. a delivery platform name). Free text, not an integration.
+  platform    String   @default("manual")
+  /// Identifier on the source, if any. Never invented.
+  externalRef String?
+  city        String?
+  createdAt   DateTime @default(now())
+
+  items        Item[]
+  observations PriceObservation[]
+
+  @@unique([platform, name])
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  merchantId  String
+  name        String
+  description String?
+  externalRef String?
+  /// Shown on the Home dashboard.
+  tracked     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  merchant     Merchant           @relation(fields: [merchantId], references: [id])
+  observations PriceObservation[]
+  analyses     PriceAnalysis[]
+  alertRules   AlertRule[]
+
+  @@unique([merchantId, name])
+}
+
+/// Immutable raw record of one price sighting. A DB trigger rejects UPDATE/DELETE.
+/// To correct a mistake, insert a new row with `supersedesId` = the wrong row.
+model PriceObservation {
+  id          String   @id @default(cuid())
+  /// When the price was seen on the source.
+  observedAt  DateTime
+  /// When it was written to this database.
+  collectedAt DateTime @default(now())
+  merchantId  String
+  itemId      String
+
+  listPrice      Int
+  currentPrice   Int
+  deliveryFee    Int @default(0)
+  serviceFee     Int @default(0)
+  discountValue  Int @default(0)
+  /// currentPrice + deliveryFee + serviceFee − discountValue, frozen at ingestion.
+  effectivePrice Int
+
+  promotionType  String?
+  deliveryEtaMin Int?
+  deliveryEtaMax Int?
+
+  /// Collector that produced this row, e.g. "manual".
+  source     String
+  sourceRef  String?
+  /// Original payload as received by the collector.
+  rawPayload Json?
+  notes      String?
+
+  supersedesId String?           @unique
+  supersedes   PriceObservation? @relation("Correction", fields: [supersedesId], references: [id])
+  supersededBy PriceObservation? @relation("Correction")
+
+  merchant    Merchant     @relation(fields: [merchantId], references: [id])
+  item        Item         @relation(fields: [itemId], references: [id])
+  alertEvents AlertEvent[]
+
+  @@index([itemId, observedAt])
+  @@index([observedAt])
+}
+
+/// Derived snapshot. Safe to delete; recompute from observations.
+model PriceAnalysis {
+  id                 String   @id @default(cuid())
+  itemId             String
+  window             String
+  computedAt         DateTime @default(now())
+  methodologyVersion String
+
+  sampleSize       Int
+  firstObservedAt  DateTime?
+  lastObservedAt   DateTime?
+  currentEffective Int?
+
+  median            Float?
+  mean              Float?
+  stdDev            Float?
+  min               Float?
+  max               Float?
+  p10               Float?
+  p25               Float?
+  p75               Float?
+  p90               Float?
+  percentileRank    Float?
+  zScore            Float?
+  diffFromMedianPct Float?
+
+  /// Full Explained<> objects, exactly as shown in the UI.
+  explanations Json
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId, window, computedAt])
+}
+
+enum AlertType {
+  ABSOLUTE_PRICE
+  PERCENTILE
+  BELOW_MEDIAN_PCT
+  NEW_HISTORICAL_LOW
+}
+
+enum AlertChannel {
+  TELEGRAM
+  CONSOLE
+}
+
+model AlertRule {
+  id               String       @id @default(cuid())
+  itemId           String
+  type             AlertType
+  /// ABSOLUTE_PRICE: fire when effective price ≤ thresholdCents.
+  thresholdCents   Int?
+  /// PERCENTILE: fire when percentile rank ≤ thresholdPercent.
+  /// BELOW_MEDIAN_PCT: fire when price is ≥ thresholdPercent below the median.
+  thresholdPercent Float?
+  window           String       @default("30d")
+  /// Minimum observations in the window before the rule may fire.
+  minSampleSize    Int          @default(10)
+  channel          AlertChannel @default(TELEGRAM)
+  telegramChatId   String?
+  cooldownMinutes  Int          @default(360)
+  active           Boolean      @default(true)
+  lastTriggeredAt  DateTime?
+  createdAt        DateTime     @default(now())
+
+  item   Item         @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  events AlertEvent[]
+}
+
+model AlertEvent {
+  id            String   @id @default(cuid())
+  ruleId        String
+  observationId String
+  triggeredAt   DateTime @default(now())
+  message       String
+  delivered     Boolean
+  deliveryError String?
+
+  rule        AlertRule        @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  observation PriceObservation @relation(fields: [observationId], references: [id])
+
+  @@index([ruleId, triggeredAt])
+}
