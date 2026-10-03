@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Link from "next/link";
 import { Nav } from "@/components/nav";
 import "./globals.css";
 
@@ -20,10 +21,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
           <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-            <a href="/" className="flex items-baseline gap-2">
+            <Link href="/" className="flex items-baseline gap-2">
               <span className="text-lg font-extrabold tracking-tight text-brand">theifoodprice</span>
               <span className="hidden text-xs text-muted sm:inline">laboratório pessoal de preços</span>
-            </a>
+            </Link>
             <Nav variant="top" />
           </div>
         </header>
