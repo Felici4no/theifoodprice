@@ -26,16 +26,16 @@ export function PriceCard({ data, now }: { data: ItemAnalysis; now: Date }) {
         <PriceLabelBadge label={a.label} />
       </header>
 
-      <div className="flex items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-2">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wide text-muted">Preço efetivo atual</p>
-          <p className="text-3xl font-extrabold tracking-tight">
+          <p className="whitespace-nowrap text-3xl font-extrabold tracking-tight">
             {currentPrice ? <ExplainedValue metric={currentPrice} /> : <span className="text-muted">—</span>}
           </p>
         </div>
         {diff !== null && (
           <p
-            className={`rounded-full px-2.5 py-1 text-sm font-bold ${
+            className={`whitespace-nowrap rounded-full px-2.5 py-1 text-sm font-bold ${
               diff < 0 ? "bg-good-soft text-good" : diff > 0 ? "bg-brand-soft text-brand" : "bg-surface"
             }`}
           >
