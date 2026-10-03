@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>theifoodprice — configurações</title>
+    <style>
+      :root { --brand: #e5262e; --muted: #6b6b6b; --border: #ececec; }
+      body { font-family: ui-sans-serif, system-ui, sans-serif; color: #1f1f1f; background: #fff; margin: 0; }
+      main { max-width: 520px; margin: 40px auto; padding: 0 16px; }
+      h1 { color: var(--brand); font-size: 22px; margin: 0 0 4px; }
+      p { color: var(--muted); font-size: 14px; line-height: 1.5; }
+      label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin: 16px 0 6px; }
+      input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; font-size: 14px; }
+      .row { display: flex; gap: 8px; margin-top: 20px; }
+      button { border: 0; border-radius: 999px; padding: 10px 18px; font-weight: 700; font-size: 14px; cursor: pointer; }
+      .primary { background: var(--brand); color: #fff; }
+      .secondary { background: #f4f4f4; }
+      #status { margin-top: 16px; font-size: 14px; font-weight: 600; }
+      ul { color: var(--muted); font-size: 13px; line-height: 1.6; padding-left: 18px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>theifoodprice</h1>
+      <p>Extensão pessoal e não oficial. Sem afiliação com o iFood.</p>
+
+      <label for="backendUrl">URL do backend (local)</label>
+      <input id="backendUrl" placeholder="http://localhost:3000" />
+      <label for="token">Token (INGEST_API_TOKEN do backend)</label>
+      <input id="token" type="password" autocomplete="off" />
+
+      <div class="row">
+        <button class="primary" id="save">Salvar</button>
+        <button class="secondary" id="test">Testar conexão</button>
+      </div>
+      <div id="status" role="status"></div>
+
+      <p><strong>O que esta extensão faz:</strong></p>
+      <ul>
+        <li>Lê apenas o conteúdo visível da página do produto.</li>
+        <li>Envia ao <em>seu</em> backend somente quando você clica em “Registrar preço”.</li>
+        <li>Não lê cookies, tokens de login nem cabeçalhos do site, e não interage com o checkout.</li>
+      </ul>
+    </main>
+    <script src="dist/options.js"></script>
+  </body>
+</html>

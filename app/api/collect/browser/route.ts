@@ -1,6 +1,7 @@
 import { requireApiToken } from "@/lib/http/auth";
 import {
   BROWSER_SOURCE,
+  MIN_EXTRACTION_CONFIDENCE,
   browserObservationSchema,
   convertBrowserObservation,
 } from "@/lib/ingestion/browser";
@@ -41,4 +42,11 @@ export async function POST(request: Request) {
     },
     { status: 201 },
   );
+}
+
+/** GET /api/collect/browser — connection check for the extension's options page. */
+export async function GET(request: Request) {
+  const denied = requireApiToken(request);
+  if (denied) return denied;
+  return Response.json({ ok: true, minConfidence: MIN_EXTRACTION_CONFIDENCE });
 }
