@@ -235,3 +235,20 @@ describe("buildHistoryChart", async () => {
     expect(c.legend.rolling.variables.rollingWindow).toBe("3d");
   });
 });
+
+describe("alertRuleFormSchema", async () => {
+  const { alertRuleFormSchema } = await import("./alert-form");
+  const base = { itemId: "i1", window: "30d", minSampleSize: "10", cooldownMinutes: "360", channel: "CONSOLE" };
+  it("parses an absolute threshold in BRL", () => {
+    const r = alertRuleFormSchema.parse({ ...base, type: "ABSOLUTE_PRICE", thresholdBRL: "27,90" });
+    expect(r).toMatchObject({ thresholdCents: 2790, thresholdPercent: null, minSampleSize: 10 });
+  });
+  it("parses a percentage threshold", () => {
+    const r = alertRuleFormSchema.parse({ ...base, type: "BELOW_MEDIAN_PCT", thresholdPercent: "15,5" });
+    expect(r.thresholdPercent).toBe(15.5);
+  });
+  it("requires the threshold the type needs", () => {
+    expect(alertRuleFormSchema.safeParse({ ...base, type: "PERCENTILE" }).success).toBe(false);
+    expect(alertRuleFormSchema.safeParse({ ...base, type: "NEW_HISTORICAL_LOW" }).success).toBe(true);
+  });
+});
