@@ -41,3 +41,41 @@ describe("ManualCollector", () => {
     expect(await c.collect()).toEqual([]);
   });
 });
+
+describe("parseObservationForm", async () => {
+  const { parseObservationForm } = await import("./form");
+  const form = (fields: Record<string, string>) => (k: string) => fields[k] ?? null;
+  const base = {
+    merchant: "Lanchonete Exemplo",
+    item: "Combo X",
+    observedAt: "2026-10-01T12:00:00.000Z",
+    listPrice: "39,90",
+    currentPrice: "35,90",
+  };
+
+  it("converts BRL strings to cents and defaults optional fees to zero", () => {
+    const { input, errors } = parseObservationForm(form({ ...base, deliveryFee: "5,99" }));
+    expect(errors).toEqual({});
+    expect(input).toMatchObject({
+      listPrice: 3990,
+      currentPrice: 3590,
+      deliveryFee: 599,
+      serviceFee: 0,
+      discountValue: 0,
+      merchant: { name: "Lanchonete Exemplo", platform: "manual" },
+    });
+  });
+
+  it("reports field errors instead of throwing", () => {
+    const { input, errors } = parseObservationForm(
+      form({ ...base, currentPrice: "abc", merchant: "", deliveryEtaMin: "-3" }),
+    );
+    expect(input).toBeUndefined();
+    expect(Object.keys(errors).sort()).toEqual(["currentPrice", "deliveryEtaMin", "merchant"]);
+  });
+
+  it("rejects future observations", () => {
+    const { errors } = parseObservationForm(form({ ...base, observedAt: "2999-01-01T00:00:00Z" }));
+    expect(errors.observedAt).toBeDefined();
+  });
+});
