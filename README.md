@@ -73,6 +73,7 @@ npm run dev                     # http://localhost:3000
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
 | `npm run db:studio` | Prisma Studio |
+| `npm run ext:build` | Build the browser extension into `extension/dist` |
 
 ### Environment variables
 
@@ -169,6 +170,14 @@ curl -X POST localhost:3000/api/observations \
        "merchant":{"name":"Lanchonete X"},"item":{"name":"Combo 1"},
        "listPrice":3990,"currentPrice":3590,"deliveryFee":599,"serviceFee":99}'
 ```
+
+### Browser companion extension
+
+`extension/` contains a Manifest V3 extension. While you browse iFood, it reads the product
+you have open **from the visible DOM**. When you click "Registrar preço", it sends a raw
+observation to `POST /api/collect/browser` and shows the explained analysis from
+`GET /api/items/:id/analysis`. It never reads cookies or tokens and never collects
+automatically. See [`extension/README.md`](extension/README.md).
 
 ### Demo data
 
