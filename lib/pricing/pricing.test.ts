@@ -212,3 +212,26 @@ describe("format", async () => {
     expect(formatSignedPercent(4.2)).toBe("+4,2%");
   });
 });
+
+describe("buildHistoryChart", async () => {
+  const { buildHistoryChart } = await import("./chart");
+  it("aligns rolling medians with points and exposes reference lines", () => {
+    const obs = dailySeries([...HISTORY, 2990]).map((o, i) => ({
+      ...o,
+      promotionType: i === HISTORY.length ? "percent_off" : null,
+    }));
+    const a = analyzePrices(obs, "30d", NOW);
+    const c = buildHistoryChart(a, obs, "30d", NOW);
+    expect(c.points).toHaveLength(21);
+    expect(c.points.at(-1)).toMatchObject({ price: 2990, promotion: true });
+    expect(c.reference).toEqual({
+      median: a.median.value,
+      p25: a.p25.value,
+      p75: a.p75.value,
+      min: 3290,
+      max: 4240,
+    });
+    expect(c.legend.band.variables.iqr).toBe((a.p75.value ?? 0) - (a.p25.value ?? 0));
+    expect(c.legend.rolling.variables.rollingWindow).toBe("3d");
+  });
+});
