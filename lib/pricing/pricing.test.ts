@@ -192,3 +192,23 @@ describe("assessDataQuality", () => {
     expect(r.dayCoverage.value).toBeNull();
   });
 });
+
+describe("format", async () => {
+  const { formatValue, formatDuration, formatSignedPercent } = await import("./format");
+  it("formats by unit", () => {
+    expect(formatValue(3690, "cents")).toBe("R$ 36,90");
+    expect(formatValue(-13.5501, "percent")).toBe("-13,6%");
+    expect(formatValue(84, "count")).toBe("84");
+    expect(formatValue(-1.2275, "zscore")).toBe("-1,23");
+    expect(formatValue(null, "cents")).toBe("—");
+  });
+  it("formats durations", () => {
+    expect(formatDuration(30 * 60_000)).toBe("30 min");
+    expect(formatDuration(HOUR_MS)).toBe("1 h");
+    expect(formatDuration(26 * HOUR_MS)).toBe("1 d 2 h");
+  });
+  it("signs percentages with a real minus", () => {
+    expect(formatSignedPercent(-13.55)).toBe("−13,6%");
+    expect(formatSignedPercent(4.2)).toBe("+4,2%");
+  });
+});

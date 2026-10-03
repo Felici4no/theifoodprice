@@ -1,4 +1,5 @@
 import { db } from "@/lib/db/client";
+import { ACTIVE_OBSERVATION } from "@/lib/db/queries";
 import { analyzePrices } from "@/lib/pricing/analysis";
 import { evaluateAlert } from "@/lib/pricing/alerts";
 import { isWindowKey, WINDOWS, type WindowKey } from "@/lib/pricing/windows";
@@ -27,7 +28,7 @@ export async function dispatchAlertsForItems(
     where: {
       itemId: { in: [...new Set(rules.map((r) => r.itemId))] },
       observedAt: { gt: new Date(now.getTime() - maxWindow), lte: now },
-      supersededBy: null,
+      ...ACTIVE_OBSERVATION,
     },
     select: { id: true, itemId: true, observedAt: true, effectivePrice: true },
   });

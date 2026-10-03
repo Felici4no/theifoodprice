@@ -2,6 +2,7 @@ import { db } from "@/lib/db/client";
 import type { Prisma } from "@/lib/db/generated/client";
 import { effectivePrice } from "@/lib/pricing/effective-price";
 import { dispatchAlertsForItems } from "@/lib/alerts/dispatch";
+import { recordAnalyses } from "@/lib/db/analysis-store";
 import type { PriceCollector, RawPriceObservation } from "./types";
 
 export interface IngestResult {
@@ -19,7 +20,8 @@ export async function runCollector(collector: PriceCollector): Promise<IngestRes
 
 /**
  * Append-only write path. Resolves merchant/item by name (creating them if new),
- * freezes effectivePrice, inserts observations, then evaluates alert rules.
+ * freezes effectivePrice, inserts observations, records analysis snapshots,
+ * then evaluates alert rules.
  */
 export async function ingest(
   raws: readonly RawPriceObservation[],
@@ -78,6 +80,7 @@ export async function ingest(
     }
   }, { timeout: 120_000 });
 
+  await recordAnalyses([...itemIds]);
   const alertsFired = await dispatchAlertsForItems([...itemIds]);
   return { inserted: observationIds.length, observationIds, itemIds: [...itemIds], alertsFired };
 }
