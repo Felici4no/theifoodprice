@@ -13,7 +13,7 @@ export function PriceLabelBadge({ label }: { label: Explained<PriceLabel> }) {
   return (
     <Explain
       explanation={label.explanation}
-      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold no-underline ${STYLE[label.value]}`}
+      className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold no-underline ${STYLE[label.value]}`}
     >
       {PRICE_LABEL_TEXT[label.value]}
     </Explain>

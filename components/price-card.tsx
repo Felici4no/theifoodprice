@@ -11,13 +11,13 @@ export function PriceCard({ data, now }: { data: ItemAnalysis; now: Date }) {
 
   return (
     <article className="flex flex-col gap-3 rounded-3xl border border-border bg-background p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <header className="flex items-start justify-between gap-3">
+      <header className="space-y-2">
         <div className="min-w-0">
           <h2 className="truncate text-base font-bold">{item.name}</h2>
-          <p className="truncate text-sm text-muted">
-            {item.merchantName}
+          <p className="flex items-center gap-2 text-sm text-muted">
+            <span className="truncate">{item.merchantName}</span>
             {item.platform === "demo" && (
-              <span className="ml-2 rounded bg-warn-soft px-1.5 py-0.5 text-[10px] font-semibold uppercase text-warn">
+              <span className="shrink-0 rounded bg-warn-soft px-1.5 py-0.5 text-[10px] font-semibold uppercase text-warn">
                 demo
               </span>
             )}

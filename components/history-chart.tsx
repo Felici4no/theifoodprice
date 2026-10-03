@@ -61,11 +61,12 @@ export function HistoryChart({ data }: { data: HistoryChartData }) {
             />
             <YAxis
               domain={[Math.floor(lo - pad), Math.ceil(hi + pad)]}
-              tickFormatter={(v: number) => formatBRL(v).replace(",00", "")}
+              // Non-breaking space keeps "R$ 28" on one line.
+              tickFormatter={(v: number) => `R$\u00a0${Math.round(v / 100)}`}
               tick={{ fontSize: 11, fill: "#6b6b6b" }}
               tickLine={false}
               axisLine={false}
-              width={64}
+              width={52}
             />
             {r.p25 !== null && r.p75 !== null && (
               <ReferenceArea y1={r.p25} y2={r.p75} fill={C.band} fillOpacity={0.08} stroke="none" />

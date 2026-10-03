@@ -24,6 +24,7 @@ export function Explain({
   const [hoverMode, setHoverMode] = useState(false);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const lastPointer = useRef<string>("mouse");
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const id = useId();
 
@@ -77,6 +78,9 @@ export function Explain({
         aria-controls={id}
         aria-label={`Explicar: ${explanation.name}`}
         className={`explainable text-left ${className}`}
+        onPointerDown={(e) => {
+          lastPointer.current = e.pointerType;
+        }}
         onPointerEnter={(e) => e.pointerType === "mouse" && show()}
         onPointerLeave={(e) => e.pointerType === "mouse" && hideSoon()}
         onFocus={() => hoverMode && show()}
@@ -84,7 +88,10 @@ export function Explain({
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (open && !hoverMode) setOpen(false);
+          // A tap always gets the bottom sheet, even on hybrid devices.
+          const touch = lastPointer.current !== "mouse";
+          setHoverMode(!touch && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+          if (open && touch) setOpen(false);
           else show();
         }}
       >
